@@ -2,34 +2,27 @@
 
 AI-vastaanottaja yrityksille. Yksi alusta, jokaiselle yritykselle oma agentti.
 
-Recevia vastaa asiakkaalle 24/7, kerää liidit ja varaa ajat. Chat, WhatsApp ja SMS ovat kanavia. Takana on aina sama agentti, sama tietämys ja sama kalenteri.
-
-**Lupaus:** Luo yrityksellesi AI-vastaanottaja muutamassa minuutissa.
-
 ## Tila
 
-- Vaihe 0: repo herätetty
-- Vaihe 1: Next.js landing, `/login` ja `/signup` (auth tulee vaiheessa 3)
-- Vaihe 2: Supabase-skeema, RLS ja seed-tenantit
+- Vaihe 0-1: landing
+- Vaihe 2: Supabase-skeema ja seed
+- Vaihe 3: signup luo organizationin, dashboard-kuori
 
 ## Paikallinen ajo
 
 ```bash
-git clone https://github.com/miromnb-coder/Recevia.git
-cd Recevia
+git pull
 npm install
 cp .env.example .env.local
+# tayta URL, anon key ja service role
 npm run dev
 ```
 
-Avaa http://localhost:3000
+Avaa http://localhost:3000/signup
 
-Laita avaimet vain `.env.local`-tiedostoon. Älä commitoi sitä, äläkä liitä avaimia chattiin.
+Demoa varten Supabasessa: Authentication > Providers > Email > **Confirm email = OFF**.
+Muuten signup ei saa sessiota eika organization synny.
 
 ## Tietokanta
 
-Katso `supabase/README.md`. Aja SQL Editorissa ensin `supabase/migrations/0001_init.sql`, sitten `supabase/seed.sql`.
-
-## Pino
-
-Next.js 15 · TypeScript · Tailwind · Supabase · OpenAI · Google Calendar · Resend · Vercel
+Katso `supabase/README.md`.

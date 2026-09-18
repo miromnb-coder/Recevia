@@ -1,25 +1,7 @@
 -- Recevia V1 schema
--- Aja tama ensin Supabase SQL Editorissa.
--- Seed-data: supabase/seed.sql
+-- Jarjestys on tarkeaa: taulut ensin, sitten funktio joka lukee profiles-taulua.
 
 create extension if not exists pgcrypto;
-
-create or replace function public.current_organization_id()
-returns uuid
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select organization_id
-  from public.profiles
-  where id = auth.uid()
-  limit 1
-$$;
-
-revoke all on function public.current_organization_id() from public;
-grant execute on function public.current_organization_id() to authenticated;
-grant execute on function public.current_organization_id() to service_role;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -167,6 +149,27 @@ create table if not exists public.agent_configs (
   updated_at timestamptz not null default now()
 );
 
+create or replace function public.current_organization_id()
+returns uuid
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  return (
+    select organization_id
+    from public.profiles
+    where id = auth.uid()
+    limit 1
+  );
+end;
+$$;
+
+revoke all on function public.current_organization_id() from public;
+grant execute on function public.current_organization_id() to authenticated;
+grant execute on function public.current_organization_id() to service_role;
+
 create index if not exists organizations_slug_idx on public.organizations (slug);
 create index if not exists organizations_widget_key_idx on public.organizations (widget_key);
 create index if not exists profiles_organization_id_idx on public.profiles (organization_id);
@@ -183,52 +186,52 @@ create index if not exists bookings_org_starts_idx on public.bookings (organizat
 drop trigger if exists organizations_set_updated_at on public.organizations;
 create trigger organizations_set_updated_at
   before update on public.organizations
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
   before update on public.profiles
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists business_profiles_set_updated_at on public.business_profiles;
 create trigger business_profiles_set_updated_at
   before update on public.business_profiles
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists services_set_updated_at on public.services;
 create trigger services_set_updated_at
   before update on public.services
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists knowledge_items_set_updated_at on public.knowledge_items;
 create trigger knowledge_items_set_updated_at
   before update on public.knowledge_items
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists conversations_set_updated_at on public.conversations;
 create trigger conversations_set_updated_at
   before update on public.conversations
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists leads_set_updated_at on public.leads;
 create trigger leads_set_updated_at
   before update on public.leads
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists bookings_set_updated_at on public.bookings;
 create trigger bookings_set_updated_at
   before update on public.bookings
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists calendar_connections_set_updated_at on public.calendar_connections;
 create trigger calendar_connections_set_updated_at
   before update on public.calendar_connections
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 drop trigger if exists agent_configs_set_updated_at on public.agent_configs;
 create trigger agent_configs_set_updated_at
   before update on public.agent_configs
-  for each row execute function public.set_updated_at();
+  for each row execute procedure public.set_updated_at();
 
 alter table public.organizations enable row level security;
 alter table public.profiles enable row level security;

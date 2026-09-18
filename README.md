@@ -10,6 +10,7 @@ Recevia vastaa asiakkaalle 24/7, kerää liidit ja varaa ajat. Chat, WhatsApp ja
 
 - Vaihe 0: repo herätetty
 - Vaihe 1: Next.js landing, `/login` ja `/signup` (auth tulee vaiheessa 3)
+- Vaihe 2: Supabase-skeema, RLS ja seed-tenantit
 
 ## Paikallinen ajo
 
@@ -24,6 +25,10 @@ npm run dev
 Avaa http://localhost:3000
 
 Laita avaimet vain `.env.local`-tiedostoon. Älä commitoi sitä, äläkä liitä avaimia chattiin.
+
+## Tietokanta
+
+Katso `supabase/README.md`. Aja SQL Editorissa ensin `supabase/migrations/0001_init.sql`, sitten `supabase/seed.sql`.
 
 ## Pino
 

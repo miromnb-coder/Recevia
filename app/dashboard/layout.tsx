@@ -10,6 +10,7 @@ const nav = [
   ["Varaukset", "/dashboard/bookings"],
   ["Kalenteri", "/dashboard/calendar"],
   ["Kanavat", "/dashboard/channels"],
+  ["Asetukset", "/dashboard/settings"],
 ];
 
 export default async function DashboardLayout({

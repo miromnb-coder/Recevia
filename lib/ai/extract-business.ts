@@ -11,18 +11,39 @@ export type ExtractedBusiness = {
   faqs: Array<{ question: string; answer: string }>;
 };
 
-const emptyHours = {
-  timezone: "Europe/Helsinki",
-  days: {
-    mon: null,
-    tue: null,
-    wed: null,
-    thu: null,
-    fri: null,
-    sat: null,
-    sun: null,
-  } as Record<string, { open: string; close: string } | null>,
-};
+const weekdayKeys = ["mon", "tue", "wed", "thu", "fri"] as const;
+
+function emptyHours() {
+  return {
+    timezone: "Europe/Helsinki",
+    days: {
+      mon: null,
+      tue: null,
+      wed: null,
+      thu: null,
+      fri: null,
+      sat: null,
+      sun: null,
+    } as Record<string, { open: string; close: string } | null>,
+  };
+}
+
+function normalizeTime(value: string) {
+  const cleaned = value.trim().replace(".", ":").replace(",", ":");
+  const match = cleaned.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return "";
+  return `${match[1].padStart(2, "0")}:${match[2]}`;
+}
+
+function expandWeekdays(days: Record<string, { open: string; close: string } | null>) {
+  const openWeekdays = weekdayKeys.filter((key) => days[key]);
+  if (openWeekdays.length === 1 && days.mon) {
+    for (const key of weekdayKeys) {
+      if (!days[key]) days[key] = days.mon;
+    }
+  }
+  return days;
+}
 
 export async function extractBusinessFromText(input: {
   company: string;
@@ -45,8 +66,15 @@ export async function extractBusinessFromText(input: {
       messages: [
         {
           role: "system",
-          content:
-            "Poimi yritystiedot sivun tekstistä. Älä keksi hintoja, aikoja tai osoitteita. Jos et löydä, jätä kenttä tyhjäksi. Palauta vain JSON.",
+          content: [
+            "Poimi yritystiedot sivun tekstistä JSON-muodossa.",
+            "Älä keksi hintoja. Jos hintaa ei löydy, price_from on null.",
+            "Jos sivulla lukee ma-pe, ma–pe tai arkisin, täytä mon,tue,wed,thu,fri samoilla ajoilla.",
+            "Kellonajat muodossa HH:MM, esim. 7.30 → 07:30.",
+            "greeting: yksi suomenkielinen lause tämän yrityksen alalle.",
+            "services: 4-8 erillistä palvelua sivun listoista (huolto, korjaus, katsastus, ilmastointi jne.).",
+            "faqs: 4-8 kysymystä sivun faktoista (aukiolo, osoite, mitä tehdään, ajanvaraus). Älä jätä FAQ:ta tyhjäksi jos sivulla on yhteystiedot tai palveluita.",
+          ].join(" "),
         },
         {
           role: "user",
@@ -54,17 +82,6 @@ export async function extractBusinessFromText(input: {
             company: input.company,
             website: input.website,
             text: input.text,
-            schema: {
-              greeting: "lyhyt suomenkielinen tervehdys",
-              phone: "puhelin tai null",
-              address: "osoite tai null",
-              hours: {
-                mon: { open: "08:00", close: "17:00" },
-                tue: null,
-              },
-              services: [{ name: "", duration_min: 30, price_from: null, description: "" }],
-              faqs: [{ question: "", answer: "" }],
-            },
           }),
         },
       ],
@@ -85,18 +102,19 @@ export async function extractBusinessFromText(input: {
     parsed = {};
   }
 
-  const hours = emptyHours;
+  const hours = emptyHours();
   const incomingHours = parsed.hours;
   if (incomingHours && typeof incomingHours === "object") {
     for (const key of Object.keys(hours.days)) {
       const row = (incomingHours as Record<string, unknown>)[key];
       if (row && typeof row === "object") {
-        const open = String((row as { open?: string }).open ?? "");
-        const close = String((row as { close?: string }).close ?? "");
+        const open = normalizeTime(String((row as { open?: string }).open ?? ""));
+        const close = normalizeTime(String((row as { close?: string }).close ?? ""));
         hours.days[key] = open && close ? { open, close } : null;
       }
     }
   }
+  hours.days = expandWeekdays(hours.days);
 
   const services = Array.isArray(parsed.services)
     ? parsed.services
@@ -126,7 +144,7 @@ export async function extractBusinessFromText(input: {
         .slice(0, 10)
     : [];
 
-  const result: ExtractedBusiness = {
+  return {
     greeting: String(parsed.greeting ?? "").trim() || "Miten voin auttaa tänään?",
     phone: String(parsed.phone ?? "").trim() || null,
     address: String(parsed.address ?? "").trim() || null,
@@ -134,6 +152,5 @@ export async function extractBusinessFromText(input: {
     hours,
     services,
     faqs,
-  };
-  return result;
+  } satisfies ExtractedBusiness;
 }

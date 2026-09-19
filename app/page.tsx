@@ -39,7 +39,7 @@ export default function HomePage() {
           </div>
           <div id="demo">
             <img
-              src="/hero-inbox.jpg"
+              src="/hero-inbox.jpeg"
               alt="Recevia-keskustelu, vapaat ajat ja ilmoitukset"
               className="w-full rounded-[28px]"
             />
@@ -55,7 +55,7 @@ export default function HomePage() {
             <Link href="#ominaisuudet" className="mt-6 inline-block text-sm">Katso kaikki ominaisuudet →</Link>
           </div>
           <img
-            src="/dashboard-preview.jpg"
+            src="/dashboard-preview.jpeg"
             alt="Recevia-dashboard Helsinki Dental"
             className="w-full rounded-[28px]"
           />

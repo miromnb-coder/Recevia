@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -131,7 +132,7 @@ function Panel({
 }: {
   title: string;
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-white">

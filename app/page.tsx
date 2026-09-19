@@ -42,11 +42,13 @@ export default function HomePage() {
             </div>
           </div>
           <div id="demo">
-            <img
-              src="/hero-inbox.jpeg"
-              alt="Recevia-keskustelu, vapaat ajat ja ilmoitukset"
-              className="w-full rounded-[28px]"
-            />
+            <ImageWell>
+              <img
+                src="/hero-inbox.jpeg"
+                alt="Recevia-keskustelu, vapaat ajat ja ilmoitukset"
+                className="relative z-10 w-full rounded-[22px] bg-white"
+              />
+            </ImageWell>
           </div>
         </section>
 
@@ -60,11 +62,13 @@ export default function HomePage() {
               Katso kaikki ominaisuudet →
             </Link>
           </div>
-          <img
-            src="/dashboard-preview.jpeg"
-            alt="Recevia-dashboard Helsinki Dental"
-            className="w-full rounded-[28px]"
-          />
+          <ImageWell>
+            <img
+              src="/dashboard-preview.jpeg"
+              alt="Recevia-dashboard Helsinki Dental"
+              className="relative z-10 w-full rounded-[22px] bg-white"
+            />
+          </ImageWell>
         </section>
 
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
@@ -72,7 +76,7 @@ export default function HomePage() {
           <p className="mt-2 text-mute">Saat Recevian käyttöön vain muutamassa minuutissa.</p>
           <div className="mt-10 grid gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] md:items-start">
             <SetupStep n="1" title="Lisää yrityksesi" text="Syötä verkkosivujesi URL-osoite.">
-              <div className="mt-4 rounded-xl border border-line bg-paper px-3 py-2 text-xs text-mute">www.yrityksesi.fi</div>
+              <div className="mt-4 rounded-xl border border-line bg-mist px-3 py-2 text-xs text-mute">www.yrityksesi.fi</div>
             </SetupStep>
             <Arrow />
             <SetupStep n="2" title="Yhdistä kalenteri" text="Linkitä Google Calendar.">
@@ -131,7 +135,11 @@ export default function HomePage() {
                 Sama Recevia AI toimii kaikissa kanavissa ja käyttää samaa asiakastietoa ja keskusteluhistoriaa.
               </p>
             </div>
-            <ChannelDiagram />
+            <ImageWell className="px-4 py-8 md:px-6 md:py-10">
+              <div className="relative z-10">
+                <ChannelDiagram />
+              </div>
+            </ImageWell>
           </div>
         </section>
 
@@ -149,6 +157,20 @@ export default function HomePage() {
       <footer className="border-t border-line px-5 py-8 text-center text-xs text-mute">
         Recevia · yksi vastaanottaja per yritys
       </footer>
+    </div>
+  );
+}
+
+function ImageWell({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`image-well rounded-[32px] p-3 md:p-5 ${className}`.trim()}>
+      {children}
     </div>
   );
 }
@@ -233,7 +255,7 @@ function PlayIcon() {
 
 function ChannelDiagram() {
   return (
-    <div className="flex w-full flex-col items-center gap-4 py-2 md:grid md:max-w-lg md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3 md:py-6">
+    <div className="flex w-full flex-col items-center gap-4 py-2 md:grid md:max-w-lg md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3 md:py-2">
       <div className="order-1 md:order-2">
         <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full border border-line bg-white shadow-sm md:h-36 md:w-36">
           <Mark className="h-10 w-10 md:h-12 md:w-12" />

@@ -20,5 +20,14 @@ body {
 }
 
 ::selection {
-  background: #ddd7cc;
+  background: #e5e7eb;
+}
+
+/* Pistehila vain kuvakonteissa, ei koko sivulla */
+.image-well {
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+  background-image: radial-gradient(#d4d4d4 1px, transparent 1px);
+  background-size: 22px 22px;
 }

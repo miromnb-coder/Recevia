@@ -15,9 +15,14 @@ const emptyHours = {
   },
 };
 
-export default async function KnowledgePage() {
+export default async function KnowledgePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string; website?: string }>;
+}) {
   const { supabase, organizationId } = await getCurrentOrgId();
   if (!organizationId) redirect("/signup");
+  const query = await searchParams;
 
   const [{ data: profile }, { data: services }, { data: faqs }, { data: agent }] =
     await Promise.all([
@@ -33,6 +38,12 @@ export default async function KnowledgePage() {
       <p className="mt-2 max-w-xl text-sm text-mute">
         Agentti käyttää vain näitä hintoja ja vastauksia. Tallenna ennen kuin testaat chattia.
       </p>
+      {query.mode === "scan" ? (
+        <p className="mt-4 rounded-2xl border border-line bg-white px-4 py-3 text-sm text-mute">
+          Automaattinen sivun luku tulee pian.
+          {query.website ? ` Tallenna tiedot sivulta ${query.website}.` : " Täytä tiedot sivulta käsin toistaiseksi."}
+        </p>
+      ) : null}
       <KnowledgeForm
         greeting={profile?.greeting ?? "Miten voin auttaa tänään?"}
         phone={profile?.phone ?? ""}

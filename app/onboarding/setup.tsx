@@ -10,15 +10,33 @@ export function OnboardingSetup() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("scan");
   const [website, setWebsite] = useState("");
+  const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState("");
 
-  function onContinue() {
-    if (mode === "scan") {
-      const url = website.trim();
-      const query = url ? `?mode=scan&website=${encodeURIComponent(url)}` : "?mode=scan";
-      router.push(`/dashboard/knowledge${query}`);
+  async function onContinue() {
+    if (mode === "manual") {
+      router.push("/dashboard/knowledge?mode=manual");
       return;
     }
-    router.push("/dashboard/knowledge?mode=manual");
+    const url = website.trim();
+    if (!url) {
+      setNotice("Anna verkkosivun osoite.");
+      return;
+    }
+    setPending(true);
+    setNotice("");
+    const response = await fetch("/api/knowledge/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ website: url }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    setPending(false);
+    if (!response.ok) {
+      router.push(`/dashboard/knowledge?mode=scan&website=${encodeURIComponent(url)}&error=${encodeURIComponent(payload.error ?? "Sivua ei voitu lukea.")}`);
+      return;
+    }
+    router.push(`/dashboard/knowledge?mode=scan&website=${encodeURIComponent(url)}`);
   }
 
   return (
@@ -30,7 +48,7 @@ export function OnboardingSetup() {
 
         <h1 className="mt-10 text-[28px] font-semibold tracking-tight">Saat vastaanottajan valmiiksi</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-mute">
-          Anna verkkosivun osoite, tai täytä tiedot itse. Automaattinen sivun luku tulee pian — nyt avataan tietämys.
+          Anna verkkosivun osoite, niin täytämme tietämyksen luonnoksen. Tarkista tiedot ennen chatin testausta.
         </p>
 
         <div className="mt-8 grid gap-3">
@@ -41,7 +59,7 @@ export function OnboardingSetup() {
             <span className="min-w-0 flex-1 text-left">
               <span className="block font-medium">Lue verkkosivu</span>
               <span className="mt-1 block text-sm text-mute">
-                · Aukioloajat<br />· Hinnat ja palvelut<br />· Valmis minuutissa
+                · Aukioloajat<br />· Hinnat ja palvelut<br />· Luonnos minuutissa
               </span>
             </span>
             {mode === "scan" ? <CheckIcon /> : null}
@@ -72,12 +90,18 @@ export function OnboardingSetup() {
             />
           </label>
         ) : null}
+        {notice ? <p className="mt-3 text-sm text-mute">{notice}</p> : null}
       </main>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-line bg-white px-5 py-4">
         <div className="mx-auto flex max-w-[520px] justify-end">
-          <button type="button" onClick={onContinue} className="rounded-full bg-ink px-5 py-2.5 text-sm text-white">
-            Jatka
+          <button
+            type="button"
+            onClick={onContinue}
+            disabled={pending}
+            className="rounded-full bg-ink px-5 py-2.5 text-sm text-white disabled:bg-[#C4C4C4]"
+          >
+            {pending ? "Luetaan sivua..." : "Jatka"}
           </button>
         </div>
       </div>

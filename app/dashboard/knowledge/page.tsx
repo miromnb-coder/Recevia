@@ -18,7 +18,7 @@ const emptyHours = {
 export default async function KnowledgePage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; website?: string }>;
+  searchParams: Promise<{ mode?: string; website?: string; error?: string }>;
 }) {
   const { supabase, organizationId } = await getCurrentOrgId();
   if (!organizationId) redirect("/signup");
@@ -38,10 +38,13 @@ export default async function KnowledgePage({
       <p className="mt-2 max-w-xl text-sm text-mute">
         Agentti käyttää vain näitä hintoja ja vastauksia. Tallenna ennen kuin testaat chattia.
       </p>
-      {query.mode === "scan" ? (
+      {query.error ? (
         <p className="mt-4 rounded-2xl border border-line bg-white px-4 py-3 text-sm text-mute">
-          Automaattinen sivun luku tulee pian.
-          {query.website ? ` Tallenna tiedot sivulta ${query.website}.` : " Täytä tiedot sivulta käsin toistaiseksi."}
+          Sivua ei luettu: {query.error} Täytä tiedot käsin.
+        </p>
+      ) : query.mode === "scan" ? (
+        <p className="mt-4 rounded-2xl border border-line bg-white px-4 py-3 text-sm text-mute">
+          Luonnos{query.website ? ` sivulta ${query.website}` : ""}. Tarkista hinnat ja aukiolo ennen testausta.
         </p>
       ) : null}
       <KnowledgeForm

@@ -7,8 +7,8 @@ const nav = [
   ["Tietamys", "/dashboard/knowledge"],
   ["Keskustelut", "/dashboard/conversations"],
   ["Liidit", "/dashboard/leads"],
-  ["Varaukset", "/dashboard"],
-  ["Kanavat", "/dashboard"],
+  ["Varaukset", "/dashboard/bookings"],
+  ["Kalenteri", "/dashboard/calendar"],
   ["Asetukset", "/dashboard"],
 ];
 

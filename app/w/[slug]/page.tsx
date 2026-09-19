@@ -11,7 +11,7 @@ export default async function PreviewPage({
   const admin = createServiceClient();
   const { data: org } = await admin
     .from("organizations")
-    .select("name, slug, widget_key")
+    .select("id, name, slug, widget_key")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -20,9 +20,7 @@ export default async function PreviewPage({
   const { data: profile } = await admin
     .from("business_profiles")
     .select("greeting")
-    .eq("organization_id", (
-      await admin.from("organizations").select("id").eq("slug", slug).single()
-    ).data?.id ?? "")
+    .eq("organization_id", org.id)
     .maybeSingle();
 
   return (

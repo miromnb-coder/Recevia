@@ -28,13 +28,13 @@ export default async function KnowledgePage() {
     ]);
 
   return (
-    <main className="px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight text-navy">Tietamys</h1>
-      <p className="mt-2 max-w-xl text-sm text-navy/60">
-        Agentti saa kayttaa vain naita hintoja ja vastauksia. Tallenna ennen kuin testaat chattia.
+    <main className="px-5 py-8 md:px-8 md:py-10">
+      <h1 className="text-3xl font-semibold tracking-tight">Tietämys</h1>
+      <p className="mt-2 max-w-xl text-sm text-mute">
+        Agentti käyttää vain näitä hintoja ja vastauksia. Tallenna ennen kuin testaat chattia.
       </p>
       <KnowledgeForm
-        greeting={profile?.greeting ?? "Miten voin auttaa tanaan?"}
+        greeting={profile?.greeting ?? "Miten voin auttaa tänään?"}
         phone={profile?.phone ?? ""}
         address={profile?.address ?? ""}
         rules={profile?.rules ?? ""}

@@ -23,27 +23,27 @@ export default async function CalendarPage({
   const redirectUri = googleRedirectUri();
 
   return (
-    <main className="px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight text-navy">Kalenteri</h1>
-      <p className="mt-2 max-w-xl text-sm text-navy/60">
+    <main className="px-5 py-8 md:px-8 md:py-10">
+      <h1 className="text-3xl font-semibold tracking-tight">Kalenteri</h1>
+      <p className="mt-2 max-w-xl text-sm text-mute">
         Kytke yrityksen Google-kalenteri. Chat ehdottaa vain vapaita aikoja.
       </p>
-      <div className="mt-8 rounded-2xl border border-navy/10 bg-white p-5">
+      <div className="mt-8 rounded-2xl border border-line bg-white p-5">
         {connection ? (
-          <p className="text-sm text-navy">Kytketty: {connection.calendar_id} · {connection.timezone}</p>
+          <p className="text-sm">Kytketty: {connection.calendar_id} · {connection.timezone}</p>
         ) : (
-          <p className="text-sm text-navy/70">Kalenteria ei ole viela kytketty.</p>
+          <p className="text-sm text-mute">Kalenteria ei ole vielä kytketty.</p>
         )}
         {configured ? (
-          <a href="/api/calendar/connect" className="mt-4 inline-block rounded-full bg-teal px-5 py-2 text-sm text-white">
+          <a href="/api/calendar/connect" className="mt-4 inline-block rounded-full bg-ink px-5 py-2 text-sm text-white">
             {connection ? "Kytke uudelleen" : "Kytke Google Calendar"}
           </a>
         ) : (
-          <p className="mt-4 text-sm text-teal">Lisaa Verceliin GOOGLE_CLIENT_ID ja GOOGLE_CLIENT_SECRET.</p>
+          <p className="mt-4 text-sm text-mute">Lisää Verceliin GOOGLE_CLIENT_ID ja GOOGLE_CLIENT_SECRET.</p>
         )}
-        <p className="mt-4 break-all text-xs text-navy/50">Google redirect URI: {redirectUri}</p>
-        {query.ok ? <p className="mt-3 text-sm text-teal">Kalenteri kytketty.</p> : null}
-        {query.error ? <p className="mt-3 text-sm text-teal">Virhe: {query.error}</p> : null}
+        <p className="mt-4 break-all text-xs text-mute">Google redirect URI: {redirectUri}</p>
+        {query.ok ? <p className="mt-3 text-sm">Kalenteri kytketty.</p> : null}
+        {query.error ? <p className="mt-3 text-sm text-mute">Virhe: {query.error}</p> : null}
       </div>
     </main>
   );

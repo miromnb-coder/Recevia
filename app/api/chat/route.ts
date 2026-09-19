@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { chatTools } from "@/lib/ai/tools";
+import { accessTokenFromRefresh, createGoogleEvent, listFreeSlots } from "@/lib/calendar/google";
 
 type AnyMessage = {
   role: string;
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     content: message,
   });
 
-  const [{ data: agent }, { data: services }, { data: history }] = await Promise.all([
+  const [{ data: agent }, { data: services }, { data: history }, { data: calendar }] = await Promise.all([
     admin.from("agent_configs").select("model, system_prompt_snapshot").eq("organization_id", org.id).maybeSingle(),
     admin.from("services").select("name, duration_min, price_from, description").eq("organization_id", org.id).eq("active", true),
     admin
@@ -76,11 +77,16 @@ export async function POST(request: Request) {
       .eq("conversation_id", conversation.id)
       .order("created_at", { ascending: true })
       .limit(20),
+    admin
+      .from("calendar_connections")
+      .select("google_refresh_token")
+      .eq("organization_id", org.id)
+      .maybeSingle(),
   ]);
 
   const system =
-    agent?.system_prompt_snapshot ||
-    `Olet Recevian vastaanottaja yritykselle ${org.name}. Alae keksi hintoja. Yksi kysymys per viesti.`;
+    (agent?.system_prompt_snapshot || `Olet Recevian vastaanottaja yritykselle ${org.name}.` ) +
+    "\n\nAlae keksi vapaita aikoja. Kutsu check_availability ennen ajan ehdottamista. Jos kalenteri ei ole kytketty, pyyda yhteystiedot.";
 
   const messages: AnyMessage[] = [
     { role: "system", content: system },
@@ -88,6 +94,8 @@ export async function POST(request: Request) {
   ];
 
   let reply = "En saanut vastausta juuri nyt.";
+  let suggestedSlots: string[] = [];
+
   for (let step = 0; step < 4; step += 1) {
     const completion = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -131,33 +139,82 @@ export async function POST(request: Request) {
     for (const call of toolCalls) {
       const args = safeJson(call.function.arguments);
       let result = "ok";
-      if (call.function.name === "get_services") {
-        result = JSON.stringify(services ?? []);
-      } else if (call.function.name === "create_lead") {
-        const name = String(args.name ?? "").trim();
-        const phone = String(args.phone ?? "").trim();
-        if (!name || !phone) {
-          result = "Tarvitaan nimi ja puhelin.";
-        } else {
-          await admin.from("leads").insert({
-            organization_id: org.id,
-            conversation_id: conversation.id,
-            name,
-            phone,
-            email: args.email ? String(args.email) : null,
-            interest: args.interest ? String(args.interest) : null,
-            status: "new",
-            summary: message,
-          });
-          await admin
-            .from("conversations")
-            .update({ status: "lead", visitor_name: name, visitor_phone: phone })
-            .eq("id", conversation.id);
-          result = "Liidi tallennettu.";
+      try {
+        if (call.function.name === "get_services") {
+          result = JSON.stringify(services ?? []);
+        } else if (call.function.name === "check_availability") {
+          if (!calendar?.google_refresh_token) {
+            result = "Kalenteri ei ole kytketty. Alae ehdota keksittyja aikoja. Pyyda nimi ja puhelin.";
+          } else {
+            const token = await accessTokenFromRefresh(calendar.google_refresh_token);
+            const duration = Number(args.duration_min) || 30;
+            suggestedSlots = await listFreeSlots(token, duration);
+            result = JSON.stringify({ slots: suggestedSlots });
+          }
+        } else if (call.function.name === "create_booking") {
+          const name = String(args.customer_name ?? "").trim();
+          const phone = String(args.customer_phone ?? "").trim();
+          const startsAt = String(args.starts_at ?? "");
+          const duration = Number(args.duration_min) || 30;
+          if (!name || !phone || !startsAt) {
+            result = "Tarvitaan starts_at, nimi ja puhelin.";
+          } else if (!calendar?.google_refresh_token) {
+            result = "Kalenteri ei ole kytketty.";
+          } else {
+            const token = await accessTokenFromRefresh(calendar.google_refresh_token);
+            const start = new Date(startsAt);
+            const end = new Date(start.getTime() + duration * 60 * 1000);
+            const eventId = await createGoogleEvent({
+              accessToken: token,
+              title: `${args.service_name || "Aika"} · ${name}`,
+              startIso: start.toISOString(),
+              endIso: end.toISOString(),
+              attendee: args.customer_email ? String(args.customer_email) : undefined,
+            });
+            await admin.from("bookings").insert({
+              organization_id: org.id,
+              conversation_id: conversation.id,
+              starts_at: start.toISOString(),
+              ends_at: end.toISOString(),
+              customer_name: name,
+              customer_phone: phone,
+              gcal_event_id: eventId,
+              status: "confirmed",
+            });
+            await admin
+              .from("conversations")
+              .update({ status: "booked", visitor_name: name, visitor_phone: phone })
+              .eq("id", conversation.id);
+            result = JSON.stringify({ booked: true, starts_at: start.toISOString() });
+          }
+        } else if (call.function.name === "create_lead") {
+          const name = String(args.name ?? "").trim();
+          const phone = String(args.phone ?? "").trim();
+          if (!name || !phone) {
+            result = "Tarvitaan nimi ja puhelin.";
+          } else {
+            await admin.from("leads").insert({
+              organization_id: org.id,
+              conversation_id: conversation.id,
+              name,
+              phone,
+              email: args.email ? String(args.email) : null,
+              interest: args.interest ? String(args.interest) : null,
+              status: "new",
+              summary: message,
+            });
+            await admin
+              .from("conversations")
+              .update({ status: "lead", visitor_name: name, visitor_phone: phone })
+              .eq("id", conversation.id);
+            result = "Liidi tallennettu.";
+          }
+        } else if (call.function.name === "escalate") {
+          await admin.from("conversations").update({ status: "handoff" }).eq("id", conversation.id);
+          result = "Keskustelu merkitty handoffiksi.";
         }
-      } else if (call.function.name === "escalate") {
-        await admin.from("conversations").update({ status: "handoff" }).eq("id", conversation.id);
-        result = "Keskustelu merkitty handoffiksi.";
+      } catch (error) {
+        result = error instanceof Error ? error.message : "Tyokalovirhe";
       }
       messages.push({
         role: "tool",
@@ -176,7 +233,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     reply,
     conversation_id: conversation.id,
-    suggested_slots: [],
+    suggested_slots: suggestedSlots,
   });
 }
 

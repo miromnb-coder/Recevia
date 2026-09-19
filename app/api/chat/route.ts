@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { chatTools } from "@/lib/ai/tools";
 
-type ChatMessage = { role: "system" | "user" | "assistant"; content: string | null; tool_calls?: ToolCall[] };
-type ToolCall = {
-  id: string;
-  type: "function";
-  function: { name: string; arguments: string };
+type AnyMessage = {
+  role: string;
+  content: string | null;
+  tool_calls?: unknown;
+  tool_call_id?: string;
 };
 
 export async function POST(request: Request) {
@@ -82,12 +82,9 @@ export async function POST(request: Request) {
     agent?.system_prompt_snapshot ||
     `Olet Recevian vastaanottaja yritykselle ${org.name}. Alae keksi hintoja. Yksi kysymys per viesti.`;
 
-  const messages: ChatMessage[] = [
+  const messages: AnyMessage[] = [
     { role: "system", content: system },
-    ...(history ?? []).map((row) => ({
-      role: row.role as "user" | "assistant" | "system",
-      content: row.content,
-    })),
+    ...(history ?? []).map((row) => ({ role: row.role, content: row.content })),
   ];
 
   let reply = "En saanut vastausta juuri nyt.";
@@ -108,20 +105,28 @@ export async function POST(request: Request) {
 
     if (!completion.ok) {
       const err = await completion.text();
-      return NextResponse.json({ error: `OpenAI: ${err.slice(0, 200)}` }, { status: 500 });
+      return NextResponse.json({ error: `OpenAI: ${err.slice(0, 240)}` }, { status: 500 });
     }
 
     const data = await completion.json();
     const choice = data.choices?.[0]?.message;
     if (!choice) break;
 
-    const toolCalls = choice.tool_calls as ToolCall[] | undefined;
+    const toolCalls = choice.tool_calls as Array<{
+      id: string;
+      function: { name: string; arguments: string };
+    }> | undefined;
+
     if (!toolCalls?.length) {
       reply = String(choice.content ?? "").trim() || reply;
       break;
     }
 
-    messages.push({ role: "assistant", content: choice.content ?? null, tool_calls: toolCalls });
+    messages.push({
+      role: "assistant",
+      content: choice.content ?? null,
+      tool_calls: toolCalls,
+    });
 
     for (const call of toolCalls) {
       const args = safeJson(call.function.arguments);
@@ -148,17 +153,17 @@ export async function POST(request: Request) {
             .from("conversations")
             .update({ status: "lead", visitor_name: name, visitor_phone: phone })
             .eq("id", conversation.id);
-          result = "Liidi tallennettu. Alae kerro asiakkaalle jarjestelmasta.";
+          result = "Liidi tallennettu.";
         }
       } else if (call.function.name === "escalate") {
         await admin.from("conversations").update({ status: "handoff" }).eq("id", conversation.id);
         result = "Keskustelu merkitty handoffiksi.";
       }
       messages.push({
-        role: "tool" as unknown as "system",
-        content: result,
+        role: "tool",
         tool_call_id: call.id,
-      } as ChatMessage & { tool_call_id: string });
+        content: result,
+      });
     }
   }
 

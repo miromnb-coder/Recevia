@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
     <main className="px-6 py-10">
       <h1 className="text-3xl font-semibold tracking-tight text-navy">Yhteenveto</h1>
       <p className="mt-2 max-w-xl text-sm text-navy/60">
-        Agentti, keskustelut ja kalenteri kytketaan seuraavissa vaiheissa. Nyt varmistetaan vain, etta yritys on eristetty.
+        Tietamys on tallennettu. Testaa seuraavaksi vastaanottajaa esikatselussa.
       </p>
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {["Keskustelut tanaan", "Uudet liidit", "Varaukset"].map((label) => (
@@ -44,6 +45,11 @@ export default async function DashboardPage() {
             <div>Slug: {org.slug}</div>
             <div>Tila: {org.status}</div>
             <div>Widget-avain: {org.widget_key}</div>
+            <div>
+              <Link className="text-teal underline" href={`/w/${org.slug}`}>
+                Avaa esikatseluchat
+              </Link>
+            </div>
           </dl>
         ) : (
           <p className="mt-3 text-sm text-teal">Profiilia ei loytynyt. Luo tili uudestaan /signup-sivulta.</p>

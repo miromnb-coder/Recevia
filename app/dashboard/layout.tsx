@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 
 const nav = [
   ["Yhteenveto", "/dashboard"],
+  ["Tietamys", "/dashboard/knowledge"],
   ["Keskustelut", "/dashboard"],
   ["Liidit", "/dashboard"],
   ["Varaukset", "/dashboard"],
-  ["Tietamys", "/dashboard"],
   ["Kanavat", "/dashboard"],
   ["Asetukset", "/dashboard"],
 ];

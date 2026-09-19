@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { chatTools } from "@/lib/ai/tools";
 import { accessTokenFromRefresh, createGoogleEvent, listFreeSlots } from "@/lib/calendar/google";
+import { notifyOwner } from "@/lib/notify";
 
 type AnyMessage = {
   role: string;
@@ -35,6 +36,13 @@ export async function POST(request: Request) {
   if (!org) {
     return NextResponse.json({ error: "Tuntematon widget." }, { status: 401 });
   }
+
+  const { data: owner } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("organization_id", org.id)
+    .eq("role", "owner")
+    .maybeSingle();
 
   let conversation = (
     await admin
@@ -85,7 +93,7 @@ export async function POST(request: Request) {
   ]);
 
   const system =
-    (agent?.system_prompt_snapshot || `Olet Recevian vastaanottaja yritykselle ${org.name}.` ) +
+    (agent?.system_prompt_snapshot || `Olet Recevian vastaanottaja yritykselle ${org.name}.`) +
     "\n\nAlae keksi vapaita aikoja. Kutsu check_availability ennen ajan ehdottamista. Jos kalenteri ei ole kytketty, pyyda yhteystiedot.";
 
   const messages: AnyMessage[] = [
@@ -166,7 +174,7 @@ export async function POST(request: Request) {
             const end = new Date(start.getTime() + duration * 60 * 1000);
             const eventId = await createGoogleEvent({
               accessToken: token,
-              title: `${args.service_name || "Aika"} · ${name}`,
+              title: `${args.service_name || "Aika"} \u00b7 ${name}`,
               startIso: start.toISOString(),
               endIso: end.toISOString(),
               attendee: args.customer_email ? String(args.customer_email) : undefined,
@@ -185,6 +193,11 @@ export async function POST(request: Request) {
               .from("conversations")
               .update({ status: "booked", visitor_name: name, visitor_phone: phone })
               .eq("id", conversation.id);
+            await notifyOwner({
+              to: owner?.email,
+              subject: `Uusi varaus \u00b7 ${org.name}`,
+              text: `${name} / ${phone}\n${start.toLocaleString("fi-FI")}\n${args.service_name || "Aika"}`,
+            });
             result = JSON.stringify({ booked: true, starts_at: start.toISOString() });
           }
         } else if (call.function.name === "create_lead") {
@@ -207,6 +220,11 @@ export async function POST(request: Request) {
               .from("conversations")
               .update({ status: "lead", visitor_name: name, visitor_phone: phone })
               .eq("id", conversation.id);
+            await notifyOwner({
+              to: owner?.email,
+              subject: `Uusi liidi \u00b7 ${org.name}`,
+              text: `${name} / ${phone}\n${args.interest || message}`,
+            });
             result = "Liidi tallennettu.";
           }
         } else if (call.function.name === "escalate") {

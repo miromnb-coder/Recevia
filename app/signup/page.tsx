@@ -38,7 +38,7 @@ export default function SignupPage() {
       setNotice(payload.error ?? "Tilin luonti epäonnistui.");
       return;
     }
-    router.push("/dashboard");
+    router.push("/onboarding");
     router.refresh();
   }
 

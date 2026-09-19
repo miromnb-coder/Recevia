@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Mark } from "@/components/brand";
 
 export default function HomePage() {
@@ -122,8 +123,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
-          <div className="grid items-center gap-10 md:grid-cols-[0.9fr_1.1fr]">
+        <section className="mx-auto max-w-6xl overflow-hidden px-5 py-16 md:py-20">
+          <div className="grid items-center gap-8 md:grid-cols-[0.9fr_1.1fr] md:gap-10">
             <div>
               <h2 className="text-3xl font-semibold tracking-tight">Monikanavainen. Yksi äly.</h2>
               <p className="mt-3 max-w-md text-mute">
@@ -161,7 +162,7 @@ function SetupStep({
   n: string;
   title: string;
   text: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="rounded-3xl border border-line bg-white p-5">
@@ -232,20 +233,17 @@ function PlayIcon() {
 
 function ChannelDiagram() {
   return (
-    <div className="relative mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] items-center gap-3 py-6">
-      <div className="flex justify-end">
-        <ChannelCard icon="web" title="Website Chat" sub="Verkkosivut" />
-      </div>
-      <div className="relative flex flex-col items-center">
-        <span className="pointer-events-none absolute right-full top-1/2 hidden h-px w-6 bg-line md:block" />
-        <span className="pointer-events-none absolute left-full top-[28%] hidden h-px w-6 bg-line md:block" />
-        <span className="pointer-events-none absolute left-full top-[72%] hidden h-px w-6 bg-line md:block" />
-        <div className="flex h-36 w-36 flex-col items-center justify-center rounded-full border border-line bg-white shadow-sm">
-          <Mark className="h-12 w-12" />
+    <div className="flex w-full flex-col items-center gap-4 py-2 md:grid md:max-w-lg md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3 md:py-6">
+      <div className="order-1 md:order-2">
+        <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full border border-line bg-white shadow-sm md:h-36 md:w-36">
+          <Mark className="h-10 w-10 md:h-12 md:w-12" />
           <p className="mt-2 text-xs font-medium">Recevia AI</p>
         </div>
       </div>
-      <div className="flex flex-col gap-6">
+      <div className="order-2 w-full max-w-xs md:order-1 md:flex md:justify-end">
+        <ChannelCard icon="web" title="Website Chat" sub="Verkkosivut" />
+      </div>
+      <div className="order-3 flex w-full max-w-xs flex-col gap-3 md:gap-6">
         <ChannelCard icon="wa" title="WhatsApp" sub="Tulossa" />
         <ChannelCard icon="sms" title="SMS" sub="Tulossa" />
       </div>
@@ -263,11 +261,11 @@ function ChannelCard({
   sub: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-3 rounded-2xl border border-line bg-white px-3 py-2 shadow-sm">
-      <span className={`flex h-8 w-8 items-center justify-center rounded-full ${icon === "wa" ? "bg-[#25D366] text-white" : "bg-ink text-white"}`}>
+    <div className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white px-3 py-2 shadow-sm md:w-auto">
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${icon === "wa" ? "bg-[#25D366] text-white" : "bg-ink text-white"}`}>
         {icon === "wa" ? <WaGlyph /> : <BubbleGlyph />}
       </span>
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-medium leading-tight">{title}</p>
         <p className="text-xs text-mute">{sub}</p>
       </div>
@@ -286,7 +284,7 @@ function BubbleGlyph() {
 function WaGlyph() {
   return (
     <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor" aria-hidden>
-      <path d="M8 2.2a5.8 5.8 0 0 0-5 8.7L2.2 13.8l3-0.8A5.8 5.8 0 1 0 8 2.2Zm3.2 8.2c-.14.4-.8.76-1.12.8-.3.05-.66.07-1.07-.07-.25-.08-.57-.2-.98-.4-1.72-.82-2.84-2.7-2.93-2.83-.08-.13-.7-.93-.7-1.77 0-.84.44-1.25.6-1.42.16-.17.35-.21.46-.21h.34c.11 0 .25 0 .38.3.14.32.46 1.12.5 1.2.04.08.07.18 0 .28-.07.11-.1.18-.2.28-.1.1-.2.22-.29.3-.1.08-.2.17-..08.18.15.25.62 1.02 1.33 1.31.83.35 1.13.3 1.3.18.18-.13.4-.4.5-.53.11-.13.22-.11.37-.06.16.04 1 .47 1.17.56.17.08.28.13.32.2.04.08.04.44-.1.84Z" />
+      <path d="M8 2.4a5.6 5.6 0 0 0-4.8 8.4L2.6 13.4l2.7-.7A5.6 5.6 0 1 0 8 2.4Zm2.6 7.7c-.1.3-.7.6-1 .7-.3 0-.6 0-1-.1-.2 0-.5-.2-.9-.4-1.6-.8-2.6-2.5-2.7-2.6-.1-.1-.6-.8-.6-1.6 0-.8.4-1.1.5-1.3.2-.2.3-.2.4-.2h.3c.1 0 .2 0 .4.3l.4 1.1c0 .1 0 .2 0 .3l-.2.2-.3.3c-.1.1-.2.2-.1.3.1.2.6.9 1.2 1.2.8.3 1 .3 1.2.2.2-.1.4-.4.5-.5.1-.1.2-.1.3 0l1.1.5c.2.1.3.1.3.2.1.1 0 .4-.1.8Z" />
     </svg>
   );
 }
@@ -331,17 +329,10 @@ function MiniIcon({ name }: { name: string }) {
       </svg>
     );
   }
-  if (name === "reply" || name === "save") {
-    return (
-      <svg viewBox="0 0 24 24" className={cls} fill="none" aria-hidden>
-        <circle cx="12" cy="9" r="3" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M6.5 18c.8-2.4 2.7-3.5 5.5-3.5s4.7 1.1 5.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
-    );
-  }
   return (
     <svg viewBox="0 0 24 24" className={cls} fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="12" cy="9" r="3" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M6.5 18c.8-2.4 2.7-3.5 5.5-3.5s4.7 1.1 5.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

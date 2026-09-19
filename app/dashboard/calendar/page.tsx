@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentOrgId } from "@/lib/org";
 import { createServiceClient } from "@/lib/supabase/server";
+import { googleRedirectUri } from "@/lib/calendar/google";
 
 export default async function CalendarPage({
   searchParams,
@@ -19,6 +20,7 @@ export default async function CalendarPage({
     .maybeSingle();
 
   const configured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  const redirectUri = googleRedirectUri();
 
   return (
     <main className="px-6 py-10">
@@ -37,8 +39,9 @@ export default async function CalendarPage({
             {connection ? "Kytke uudelleen" : "Kytke Google Calendar"}
           </a>
         ) : (
-          <p className="mt-4 text-sm text-teal">Lisaa Verceliin GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET ja NEXT_PUBLIC_APP_URL.</p>
+          <p className="mt-4 text-sm text-teal">Lisaa Verceliin GOOGLE_CLIENT_ID ja GOOGLE_CLIENT_SECRET.</p>
         )}
+        <p className="mt-4 break-all text-xs text-navy/50">Google redirect URI: {redirectUri}</p>
         {query.ok ? <p className="mt-3 text-sm text-teal">Kalenteri kytketty.</p> : null}
         {query.error ? <p className="mt-3 text-sm text-teal">Virhe: {query.error}</p> : null}
       </div>

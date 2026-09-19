@@ -1,12 +1,17 @@
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+const PRODUCTION_APP_URL = "https://recevia-lemon.vercel.app";
 
 export function appUrl() {
-  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const explicit = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/$/, "");
+  if (explicit && !explicit.includes("recevia.vercel.app")) return explicit;
+  if (process.env.VERCEL_ENV === "production") return PRODUCTION_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
 }
 
 export function googleRedirectUri() {
-  return process.env.GOOGLE_REDIRECT_URI || `${appUrl()}/api/calendar/callback`;
+  return `${appUrl()}/api/calendar/callback`;
 }
 
 export function googleAuthUrl(state: string) {

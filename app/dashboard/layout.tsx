@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 const nav = [
   ["Yhteenveto", "/dashboard"],
   ["Tietamys", "/dashboard/knowledge"],
-  ["Keskustelut", "/dashboard"],
-  ["Liidit", "/dashboard"],
+  ["Keskustelut", "/dashboard/conversations"],
+  ["Liidit", "/dashboard/leads"],
   ["Varaukset", "/dashboard"],
   ["Kanavat", "/dashboard"],
   ["Asetukset", "/dashboard"],

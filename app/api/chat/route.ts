@@ -11,6 +11,30 @@ type AnyMessage = {
   tool_call_id?: string;
 };
 
+function finlandNow() {
+  return new Intl.DateTimeFormat("fi-FI", {
+    timeZone: "Europe/Helsinki",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date());
+}
+
+function formatSlot(iso: string) {
+  return new Intl.DateTimeFormat("fi-FI", {
+    timeZone: "Europe/Helsinki",
+    weekday: "short",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const widgetKey = String(body?.widget_key ?? "").trim();
@@ -94,7 +118,8 @@ export async function POST(request: Request) {
 
   const system =
     (agent?.system_prompt_snapshot || `Olet Recevian vastaanottaja yritykselle ${org.name}.`) +
-    "\n\nAlae keksi vapaita aikoja. Kutsu check_availability ennen ajan ehdottamista. Jos kalenteri ei ole kytketty, pyyda yhteystiedot.";
+    `\n\nTämä päivä (Europe/Helsinki): ${finlandNow()}. Käytä tätä vuotta, älä vuotta 2023 tai 2024.` +
+    "\nÄlä keksi vapaita aikoja. Kutsu check_availability ennen ajan ehdottamista. create_booking starts_at pitää olla työkalun palauttama ISO-aika. Jos kalenteri ei ole kytketty, pyydä yhteystiedot.";
 
   const messages: AnyMessage[] = [
     { role: "system", content: system },
@@ -152,29 +177,39 @@ export async function POST(request: Request) {
           result = JSON.stringify(services ?? []);
         } else if (call.function.name === "check_availability") {
           if (!calendar?.google_refresh_token) {
-            result = "Kalenteri ei ole kytketty. Alae ehdota keksittyja aikoja. Pyyda nimi ja puhelin.";
+            result = "Kalenteri ei ole kytketty. Älä ehdota keksittyjä aikoja. Pyydä nimi ja puhelin.";
           } else {
             const token = await accessTokenFromRefresh(calendar.google_refresh_token);
             const duration = Number(args.duration_min) || 30;
             suggestedSlots = await listFreeSlots(token, duration);
-            result = JSON.stringify({ slots: suggestedSlots });
+            result = JSON.stringify({
+              slots: suggestedSlots.map((iso) => ({ iso, label: formatSlot(iso) })),
+            });
           }
         } else if (call.function.name === "create_booking") {
           const name = String(args.customer_name ?? "").trim();
           const phone = String(args.customer_phone ?? "").trim();
           const startsAt = String(args.starts_at ?? "");
           const duration = Number(args.duration_min) || 30;
+          const start = new Date(startsAt);
+          const past = Number.isNaN(start.getTime()) || start.getTime() < Date.now() - 60_000;
+          const allowed =
+            suggestedSlots.length === 0 ||
+            suggestedSlots.some((iso) => Math.abs(new Date(iso).getTime() - start.getTime()) < 15 * 60 * 1000);
           if (!name || !phone || !startsAt) {
             result = "Tarvitaan starts_at, nimi ja puhelin.";
+          } else if (past) {
+            result = "Aika on menneisyydessä tai virheellinen. Käytä check_availability-palautteen ISO-aikaa ja kuluvaa vuotta.";
+          } else if (!allowed) {
+            result = "Aika ei ole tarjotuissa sloteissa. Käytä check_availability-palautteen iso-kenttää.";
           } else if (!calendar?.google_refresh_token) {
             result = "Kalenteri ei ole kytketty.";
           } else {
             const token = await accessTokenFromRefresh(calendar.google_refresh_token);
-            const start = new Date(startsAt);
             const end = new Date(start.getTime() + duration * 60 * 1000);
             const eventId = await createGoogleEvent({
               accessToken: token,
-              title: `${args.service_name || "Aika"} \u00b7 ${name}`,
+              title: `${args.service_name || "Aika"} · ${name}`,
               startIso: start.toISOString(),
               endIso: end.toISOString(),
               attendee: args.customer_email ? String(args.customer_email) : undefined,
@@ -195,10 +230,10 @@ export async function POST(request: Request) {
               .eq("id", conversation.id);
             await notifyOwner({
               to: owner?.email,
-              subject: `Uusi varaus \u00b7 ${org.name}`,
+              subject: `Uusi varaus · ${org.name}`,
               text: `${name} / ${phone}\n${start.toLocaleString("fi-FI")}\n${args.service_name || "Aika"}`,
             });
-            result = JSON.stringify({ booked: true, starts_at: start.toISOString() });
+            result = JSON.stringify({ booked: true, starts_at: start.toISOString(), label: formatSlot(start.toISOString()) });
           }
         } else if (call.function.name === "create_lead") {
           const name = String(args.name ?? "").trim();
@@ -222,7 +257,7 @@ export async function POST(request: Request) {
               .eq("id", conversation.id);
             await notifyOwner({
               to: owner?.email,
-              subject: `Uusi liidi \u00b7 ${org.name}`,
+              subject: `Uusi liidi · ${org.name}`,
               text: `${name} / ${phone}\n${args.interest || message}`,
             });
             result = "Liidi tallennettu.";

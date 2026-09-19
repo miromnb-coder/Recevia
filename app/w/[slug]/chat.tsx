@@ -25,9 +25,7 @@ export function PreviewChat({
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const [messages, setMessages] = useState<Bubble[]>([
-    { role: "assistant", content: greeting },
-  ]);
+  const [messages, setMessages] = useState<Bubble[]>([{ role: "assistant", content: greeting }]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -49,7 +47,7 @@ export function PreviewChat({
     const payload = await response.json();
     setPending(false);
     if (!response.ok) {
-      setError(payload.error ?? "Viestia ei voitu lahettaa.");
+      setError(payload.error ?? "Viestiä ei voitu lähettää.");
       return;
     }
     setMessages((prev) => [...prev, { role: "assistant", content: payload.reply }]);
@@ -57,31 +55,31 @@ export function PreviewChat({
 
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-lg flex-col px-6 pb-8">
-      <p className="text-xs uppercase tracking-widest text-teal">Esikatselu</p>
-      <h1 className="mt-1 text-2xl font-semibold text-navy">{company}</h1>
+      <p className="text-xs text-mute">Esikatselu</p>
+      <h1 className="mt-1 text-2xl font-semibold">{company}</h1>
       <div className="mt-6 flex flex-1 flex-col gap-3">
         {messages.map((item, index) => (
           <div
             key={index}
-            className={item.role === "user" ? "self-end rounded-2xl bg-navy px-4 py-2 text-sm text-white" : "self-start rounded-2xl bg-white px-4 py-2 text-sm text-navy shadow-sm"}
+            className={item.role === "user" ? "self-end rounded-2xl bg-ink px-4 py-2 text-sm text-white" : "self-start rounded-2xl border border-line bg-white px-4 py-2 text-sm"}
           >
             {item.content}
           </div>
         ))}
-        {pending ? <p className="text-sm text-navy/50">Kirjoittaa...</p> : null}
+        {pending ? <p className="text-sm text-mute">Kirjoittaa...</p> : null}
       </div>
       <form onSubmit={onSubmit} className="mt-4 flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Kirjoita viesti"
-          className="flex-1 rounded-full border border-navy/15 bg-white px-4 py-3 text-sm outline-none"
+          className="flex-1 rounded-full border border-line bg-white px-4 py-3 text-sm outline-none"
         />
-        <button disabled={pending} className="rounded-full bg-teal px-4 py-3 text-sm text-white disabled:opacity-60">
-          Laheta
+        <button disabled={pending} className="rounded-full bg-ink px-4 py-3 text-sm text-white disabled:opacity-60">
+          Lähetä
         </button>
       </form>
-      {error ? <p className="mt-2 text-sm text-teal">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm text-mute">{error}</p> : null}
     </main>
   );
 }

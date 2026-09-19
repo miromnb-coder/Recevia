@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { getCurrentOrgId } from "@/lib/org";
 
+const statusLabel: Record<string, string> = {
+  confirmed: "vahvistettu",
+  cancelled: "peruttu",
+};
+
 export default async function BookingsPage() {
   const { supabase, organizationId } = await getCurrentOrgId();
   if (!organizationId) redirect("/signup");
@@ -23,7 +28,11 @@ export default async function BookingsPage() {
             <div key={row.id} className="px-5 py-4 text-sm">
               <p className="font-medium">{row.customer_name || "Asiakas"}</p>
               <p className="mt-1 text-mute">
-                {new Date(row.starts_at).toLocaleString("fi-FI")} · {row.status}
+                {new Date(row.starts_at).toLocaleString("fi-FI", {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                })}{" "}
+                · {statusLabel[row.status] ?? row.status}
                 {row.customer_phone ? ` · ${row.customer_phone}` : ""}
               </p>
             </div>

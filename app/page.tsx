@@ -23,7 +23,7 @@ export default function HomePage() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 md:grid-cols-2 md:py-24">
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-mute">AI-vastaanottaja</p>
             <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
@@ -37,18 +37,28 @@ export default function HomePage() {
               <a href="#demo" className="rounded-full border border-line bg-white px-5 py-3 text-sm">Katso demo</a>
             </div>
           </div>
-          <HeroDemo />
+          <div id="demo">
+            <img
+              src="/hero-inbox.jpg"
+              alt="Recevia-keskustelu, vapaat ajat ja ilmoitukset"
+              className="w-full rounded-[28px]"
+            />
+          </div>
         </section>
 
-        <section className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-[0.9fr_1.3fr]">
-          <div className="md:pt-8">
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-[0.9fr_1.3fr]">
+          <div>
             <h2 className="text-3xl font-semibold tracking-tight">Kaikki yhdessä hallinnassa.</h2>
             <p className="mt-4 max-w-sm text-mute">
               Seuraa keskusteluja, liidejä, varauksia ja kalenteria yhdessä näkymässä.
             </p>
             <Link href="#ominaisuudet" className="mt-6 inline-block text-sm">Katso kaikki ominaisuudet →</Link>
           </div>
-          <DashboardPreview />
+          <img
+            src="/dashboard-preview.jpg"
+            alt="Recevia-dashboard Helsinki Dental"
+            className="w-full rounded-[28px]"
+          />
         </section>
 
         <section className="mx-auto max-w-6xl px-5 py-16">
@@ -124,7 +134,7 @@ export default function HomePage() {
           <div className="mt-6 max-w-xl rounded-3xl border border-line bg-white p-8">
             <p className="text-lg font-medium">Pian julkaistaan</p>
             <p className="mt-3 text-sm leading-relaxed text-mute">
-              Voit aloittaa jo nyt. Julkinen hinnasto tulee, kun V1 on testattu. Ei piilokuluja rakentamisen aikana.
+              Voit aloittaa jo nyt. Julkinen hinnasto tulee, kun V1 on testattu.
             </p>
             <Link href="/signup" className="mt-6 inline-block rounded-full bg-ink px-5 py-3 text-sm text-white">Aloita ilmaiseksi</Link>
           </div>
@@ -140,76 +150,6 @@ export default function HomePage() {
       <footer className="border-t border-line px-5 py-8 text-center text-xs text-mute">
         Recevia · yksi vastaanottaja per yritys
       </footer>
-    </div>
-  );
-}
-
-function HeroDemo() {
-  return (
-    <div id="demo" className="relative">
-      <div className="rounded-[28px] border border-line bg-white p-3 shadow-card">
-        <div className="grid gap-3 md:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-2xl bg-paper p-3 text-sm">
-            <p className="text-xs text-mute">Keskustelut</p>
-            {["Laura Virtanen", "Mikko Korhonen", "Sanna Niemi"].map((name, i) => (
-              <div key={name} className={`mt-3 rounded-xl px-3 py-2 ${i === 0 ? "bg-white" : ""}`}>
-                <p className="font-medium">{name}</p>
-                <p className="text-xs text-mute">Hammaskiven poisto</p>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-2xl bg-paper p-3 text-sm">
-            <p className="text-xs text-mute">Laura Virtanen · Online</p>
-            <div className="mt-3 space-y-2">
-              <p className="max-w-[90%] rounded-2xl bg-white px-3 py-2">Hei, paljonko hammaskiven poisto maksaa?</p>
-              <p className="ml-auto max-w-[90%] rounded-2xl bg-ink px-3 py-2 text-white">Hammaskiven poisto 89 €. Haluatko varata ajan?</p>
-              <p className="max-w-[90%] rounded-2xl bg-white px-3 py-2">Kyllä.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-3 grid gap-2 text-xs md:grid-cols-3">
-        <div className="rounded-2xl border border-line bg-white px-3 py-2">Uusi liidi · Laura Virtanen</div>
-        <div className="rounded-2xl border border-line bg-white px-3 py-2">Ajanvaraus vahvistettu</div>
-        <div className="rounded-2xl border border-line bg-white px-3 py-2">Kalenteri päivitetty</div>
-      </div>
-    </div>
-  );
-}
-
-function DashboardPreview() {
-  return (
-    <div className="rounded-[28px] border border-line bg-white p-5 shadow-card">
-      <p className="text-sm font-medium">Helsinki Dental</p>
-      <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-        {[
-          ["Keskustelut", "24"],
-          ["Liidit", "12"],
-          ["Varaukset", "9"],
-        ].map(([l, n]) => (
-          <div key={l} className="rounded-2xl bg-paper py-4">
-            <p className="text-2xl font-semibold">{n}</p>
-            <p className="mt-1 text-xs text-mute">{l}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-5 grid gap-3 text-sm md:grid-cols-3">
-        <div>
-          <p className="text-xs text-mute">Viimeisimmät keskustelut</p>
-          <p className="mt-2">Laura Virtanen</p>
-          <p className="text-mute">Mikko Korhonen</p>
-        </div>
-        <div>
-          <p className="text-xs text-mute">Uusimmat liidit</p>
-          <p className="mt-2">Sanna Niemi</p>
-          <p className="text-mute">Antti Järvinen</p>
-        </div>
-        <div>
-          <p className="text-xs text-mute">Varaukset</p>
-          <p className="mt-2">Pe 12.4. klo 14:30</p>
-          <p className="text-mute">To 15.4. klo 10:00</p>
-        </div>
-      </div>
     </div>
   );
 }

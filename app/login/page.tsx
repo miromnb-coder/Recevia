@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Mark } from "@/components/brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,29 +31,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-sand">
+    <div className="flex min-h-screen flex-col bg-paper">
       <header className="px-6 py-6">
-        <Link href="/" className="text-lg font-semibold text-navy">Recevia</Link>
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Mark className="h-6 w-6" /> Recevia
+        </Link>
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-16">
-        <h1 className="text-3xl font-semibold tracking-tight text-navy">Kirjaudu Receviaan</h1>
-        <p className="mt-2 text-sm text-navy/60">Omistajan nakyma aukeaa kirjautumisen jalkeen.</p>
-        <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-2xl border border-navy/10 bg-white p-6">
-          <label className="block text-sm text-navy/80">
-            Sahkoposti
-            <input required name="email" type="email" className="mt-1 w-full rounded-xl border border-navy/15 px-3 py-2 outline-none ring-teal/30 focus:ring-2" />
+        <h1 className="text-3xl font-semibold tracking-tight">Kirjaudu Receviaan</h1>
+        <p className="mt-2 text-sm text-mute">Omistajan näkymä aukeaa kirjautumisen jälkeen.</p>
+        <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-3xl border border-line bg-white p-6 shadow-card">
+          <label className="block text-sm">
+            Sähköposti
+            <input required name="email" type="email" className="mt-1 w-full rounded-xl border border-line px-3 py-2 outline-none focus:border-ink" />
           </label>
-          <label className="block text-sm text-navy/80">
+          <label className="block text-sm">
             Salasana
-            <input required name="password" type="password" className="mt-1 w-full rounded-xl border border-navy/15 px-3 py-2 outline-none ring-teal/30 focus:ring-2" />
+            <input required name="password" type="password" className="mt-1 w-full rounded-xl border border-line px-3 py-2 outline-none focus:border-ink" />
           </label>
-          <button disabled={pending} type="submit" className="w-full rounded-full bg-navy py-3 text-sm font-medium text-white hover:bg-ink disabled:opacity-60">
+          <button disabled={pending} type="submit" className="w-full rounded-full bg-ink py-3 text-sm text-white disabled:opacity-60">
             {pending ? "Kirjaudutaan..." : "Kirjaudu"}
           </button>
         </form>
-        {notice ? <p className="mt-4 text-sm text-teal">{notice}</p> : null}
-        <p className="mt-6 text-sm text-navy/60">
-          Ei tilia viela? <Link href="/signup" className="text-teal underline">Luo vastaanottaja</Link>
+        {notice ? <p className="mt-4 text-sm text-mute">{notice}</p> : null}
+        <p className="mt-6 text-sm text-mute">
+          Ei tiliä vielä? <Link href="/signup" className="text-ink underline">Luo vastaanottaja</Link>
         </p>
       </main>
     </div>

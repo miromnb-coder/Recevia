@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Mark } from "@/components/brand";
 
 const nav = [
   ["Yhteenveto", "/dashboard"],
-  ["Tietamys", "/dashboard/knowledge"],
+  ["Tietämys", "/dashboard/knowledge"],
   ["Keskustelut", "/dashboard/conversations"],
   ["Liidit", "/dashboard/leads"],
   ["Varaukset", "/dashboard/bookings"],
@@ -41,19 +42,21 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-sand md:grid md:grid-cols-[220px_1fr]">
-      <aside className="border-b border-navy/10 bg-white px-5 py-6 md:border-b-0 md:border-r">
-        <Link href="/" className="text-sm font-semibold text-navy">Recevia</Link>
-        <p className="mt-2 text-lg font-semibold text-navy">{orgName}</p>
+    <div className="min-h-screen bg-paper md:grid md:grid-cols-[220px_1fr]">
+      <aside className="border-b border-line bg-white px-5 py-6 md:border-b-0 md:border-r">
+        <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
+          <Mark className="h-5 w-5" /> Recevia
+        </Link>
+        <p className="mt-4 text-lg font-semibold">{orgName}</p>
         <nav className="mt-8 grid gap-1 text-sm">
           {nav.map(([label, href]) => (
-            <Link key={label} href={href} className="rounded-lg px-2 py-2 text-navy/70 hover:bg-mist hover:text-navy">
+            <Link key={label} href={href} className="rounded-lg px-2 py-2 text-mute hover:bg-mist hover:text-ink">
               {label}
             </Link>
           ))}
         </nav>
         <form action="/api/auth/signout" method="post" className="mt-10">
-          <button className="text-sm text-navy/50 hover:text-navy" type="submit">Kirjaudu ulos</button>
+          <button className="text-sm text-mute hover:text-ink" type="submit">Kirjaudu ulos</button>
         </form>
       </aside>
       <div>{children}</div>

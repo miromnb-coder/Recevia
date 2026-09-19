@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Mark } from "@/components/brand";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function SignupPage() {
     const payload = await response.json();
     setPending(false);
     if (!response.ok) {
-      setNotice(payload.error ?? "Tilin luonti epaonnistui.");
+      setNotice(payload.error ?? "Tilin luonti epäonnistui.");
       return;
     }
     router.push("/dashboard");
@@ -41,33 +42,35 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-sand">
+    <div className="flex min-h-screen flex-col bg-paper">
       <header className="px-6 py-6">
-        <Link href="/" className="text-lg font-semibold text-navy">Recevia</Link>
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Mark className="h-6 w-6" /> Recevia
+        </Link>
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-16">
-        <h1 className="text-3xl font-semibold tracking-tight text-navy">Luo vastaanottaja</h1>
-        <p className="mt-2 text-sm text-navy/60">Yrityksen nimi riittaa alkuun. Kalenteri ja tietamys tulevat myohemmin.</p>
-        <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-2xl border border-navy/10 bg-white p-6">
-          <label className="block text-sm text-navy/80">
+        <h1 className="text-3xl font-semibold tracking-tight">Luo vastaanottaja</h1>
+        <p className="mt-2 text-sm text-mute">Yrityksen nimi riittää alkuun.</p>
+        <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-3xl border border-line bg-white p-6 shadow-card">
+          <label className="block text-sm">
             Yrityksen nimi
-            <input required name="company" className="mt-1 w-full rounded-xl border border-navy/15 px-3 py-2 outline-none ring-teal/30 focus:ring-2" />
+            <input required name="company" className="mt-1 w-full rounded-xl border border-line px-3 py-2 outline-none focus:border-ink" />
           </label>
-          <label className="block text-sm text-navy/80">
-            Sahkoposti
-            <input required type="email" name="email" className="mt-1 w-full rounded-xl border border-navy/15 px-3 py-2 outline-none ring-teal/30 focus:ring-2" />
+          <label className="block text-sm">
+            Sähköposti
+            <input required type="email" name="email" className="mt-1 w-full rounded-xl border border-line px-3 py-2 outline-none focus:border-ink" />
           </label>
-          <label className="block text-sm text-navy/80">
+          <label className="block text-sm">
             Salasana
-            <input required type="password" name="password" minLength={8} className="mt-1 w-full rounded-xl border border-navy/15 px-3 py-2 outline-none ring-teal/30 focus:ring-2" />
+            <input required type="password" name="password" minLength={8} className="mt-1 w-full rounded-xl border border-line px-3 py-2 outline-none focus:border-ink" />
           </label>
-          <button disabled={pending} type="submit" className="w-full rounded-full bg-teal py-3 text-sm font-medium text-white hover:bg-[#0c5c60] disabled:opacity-60">
-            {pending ? "Luodaan..." : "Jatka"}
+          <button disabled={pending} type="submit" className="w-full rounded-full bg-ink py-3 text-sm text-white disabled:opacity-60">
+            {pending ? "Luodaan..." : "Aloita ilmaiseksi"}
           </button>
         </form>
-        {notice ? <p className="mt-4 text-sm text-teal">{notice}</p> : null}
-        <p className="mt-6 text-sm text-navy/60">
-          Onko tili jo olemassa? <Link href="/login" className="text-teal underline">Kirjaudu</Link>
+        {notice ? <p className="mt-4 text-sm text-mute">{notice}</p> : null}
+        <p className="mt-6 text-sm text-mute">
+          Onko tili jo olemassa? <Link href="/login" className="text-ink underline">Kirjaudu</Link>
         </p>
       </main>
     </div>

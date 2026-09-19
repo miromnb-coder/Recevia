@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Recevia",
-  description: "Luo yrityksellesi AI-vastaanottaja muutamassa minuutissa.",
+  description: "AI-vastaanottaja, joka muuttaa viestit ajanvarauksiksi.",
 };
 
 export default function RootLayout({
@@ -13,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fi">
-      <body className="font-ui min-h-screen">{children}</body>
+      <body className={`${sans.variable} font-sans min-h-screen`}>{children}</body>
     </html>
   );
 }

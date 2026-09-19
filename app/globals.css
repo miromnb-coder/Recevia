@@ -6,15 +6,19 @@
   color-scheme: light;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   min-height: 100%;
 }
 
 body {
-  @apply bg-sand text-navy antialiased;
+  @apply bg-paper text-ink antialiased;
 }
 
 ::selection {
-  background: #c5e4e4;
+  background: #ddd7cc;
 }

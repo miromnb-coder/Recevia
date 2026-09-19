@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     phone: String(body.phone ?? "").trim() || null,
     address: String(body.address ?? "").trim() || null,
     rules: String(body.rules ?? "").trim() || null,
+    language: String(body.language ?? "fi").trim() || "fi",
     hours: body.hours ?? {},
   };
 
